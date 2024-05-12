@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/coreos/go-systemd/v22/activation"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -193,6 +194,7 @@ func createPidFile(path string, process *libcontainer.Process) error {
 }
 
 func createContainer(context *cli.Context, id string, spec *specs.Spec) (libcontainer.Container, error) {
+	logrus.Infof("%s [CONTINUUM] 0850 runc:createContainer:start id=%s", time.Now().UnixNano(), id)
 	rootlessCg, err := shouldUseRootlessCgroupManager(context)
 	if err != nil {
 		return nil, err
@@ -214,6 +216,7 @@ func createContainer(context *cli.Context, id string, spec *specs.Spec) (libcont
 	if err != nil {
 		return nil, err
 	}
+	logrus.Infof("%s [CONTINUUM] 0851 runc:createContainer:done id=%s", time.Now().UnixNano(), id)
 	return factory.Create(id, config)
 }
 
@@ -382,6 +385,7 @@ func startContainer(context *cli.Context, action CtAct, criuOpts *libcontainer.C
 	if id == "" {
 		return -1, errEmptyID
 	}
+	logrus.Infof("%s [CONTINUUM] 0857 runc:startContainer:start id=%s", time.Now().UnixNano(), id)
 
 	notifySocket := newNotifySocket(context, os.Getenv("NOTIFY_SOCKET"), id)
 	if notifySocket != nil {
@@ -424,5 +428,6 @@ func startContainer(context *cli.Context, action CtAct, criuOpts *libcontainer.C
 		criuOpts:        criuOpts,
 		init:            true,
 	}
+	logrus.Infof("%s [CONTINUUM] 0858 runc:startContainer:done id=%s", time.Now().UnixNano(), id)
 	return r.run(spec.Process)
 }

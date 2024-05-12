@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"runtime/debug"
 	"strconv"
+	"time"
 
 	securejoin "github.com/cyphar/filepath-securejoin"
 	"github.com/moby/sys/mountinfo"
@@ -125,6 +126,7 @@ type LinuxFactory struct {
 }
 
 func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, error) {
+	logrus.Infof("%s [CONTINUUM] 0852 runc:factory_linux:Create:start id=%s", time.Now().UnixNano(), id)
 	if l.Root == "" {
 		return nil, errors.New("root not set")
 	}
@@ -161,6 +163,7 @@ func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, err
 		if err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, unix.ENODEV) {
 			return nil, fmt.Errorf("unable to get cgroup PIDs: %w", err)
 		}
+		logrus.Infof("%s [CONTINUUM] 0853 runc:factory_linux:Create:GetAllPids:done id=%s", time.Now().UnixNano(), id)
 		if len(pids) != 0 {
 			if config.Cgroups.Systemd {
 				// systemd cgroup driver can't add a pid to an
@@ -173,6 +176,7 @@ func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, err
 			logrus.Warn("DEPRECATED: running container in a non-empty cgroup won't be supported in runc 1.2; https://github.com/opencontainers/runc/issues/3132")
 		}
 	}
+	logrus.Infof("%s [CONTINUUM] 0854 runc:factory_linux:Create:cm.Exist:done id=%s", time.Now().UnixNano(), id)
 
 	// Check that cgroup is not frozen. Do not use Exists() here
 	// since in cgroup v1 it only checks "devices" controller.
@@ -190,6 +194,7 @@ func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, err
 	if err := os.Chown(containerRoot, unix.Geteuid(), unix.Getegid()); err != nil {
 		return nil, err
 	}
+	logrus.Infof("%s [CONTINUUM] 0855 runc:factory_linux:Create:os.Chown:done id=%s", time.Now().UnixNano(), id)
 	c := &linuxContainer{
 		id:              id,
 		root:            containerRoot,
@@ -203,10 +208,12 @@ func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, err
 		intelRdtManager: intelrdt.NewManager(config, id, ""),
 	}
 	c.state = &stoppedState{c: c}
+	logrus.Infof("%s [CONTINUUM] 0856 runc:factory_linux:Create:done id=%s", time.Now().UnixNano(), id)
 	return c, nil
 }
 
 func (l *LinuxFactory) Load(id string) (Container, error) {
+	logrus.Infof("%s [CONTINUUM] 0859 runc:runc:factory_linux:Load:start id=%s", time.Now().UnixNano(), id)
 	if l.Root == "" {
 		return nil, errors.New("root not set")
 	}
@@ -250,6 +257,7 @@ func (l *LinuxFactory) Load(id string) (Container, error) {
 	if err := c.refreshState(); err != nil {
 		return nil, err
 	}
+	logrus.Infof("%s [CONTINUUM] 0860 runc:runc:factory_linux:Load:done id=%s", time.Now().UnixNano(), id)
 	return c, nil
 }
 

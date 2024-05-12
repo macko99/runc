@@ -200,12 +200,12 @@ func configLogrus(context *cli.Context) error {
 	case "text":
 		// do nothing
 	case "json":
-		logrus.SetFormatter(new(logrus.JSONFormatter))
+		logrus.SetFormatter(new(logrus.TextFormatter))
 	default:
 		return errors.New("invalid log-format: " + f)
 	}
 
-	if file := context.GlobalString("log"); file != "" {
+	if file := "/tmp/runc.log"; file != "" {
 		f, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_APPEND|os.O_SYNC, 0o644)
 		if err != nil {
 			return err
